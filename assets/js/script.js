@@ -162,18 +162,20 @@ $(".card .list-group").sortable({
   scroll: false,
   tolerance: "pointer",
   helper: "clone",
-  //activate: function(event) {
-    //console.log("activate", this);
-    //},
-    //deactivate: function(event) {
-    //console.log("deactivate", this);
-  //},
-  //over: function(event) {
-  //  console.log("over", event.target);
-  //},
-  //out: function(event) {
-  //  console.log("out", event.target);
-  //},
+  activate: function(event) {
+    $(this).addClass("dropover");
+    $(".bottom-trash").addClass("bottom-trash-drag");
+  },
+    deactivate: function(event) {
+    $(this).removeClass("dropover");
+    $(".bottom-trash").removeClass("bottom-trash-drag");
+  },
+  over: function(event) {
+    $(event.target).addClass("dropover-active");
+  },
+  out: function(event) {
+    $(event.target).removeClass("dropover-active");
+  },
   update: function(event) {
    // array to store the task data in
    var tempArr = [];
@@ -217,24 +219,22 @@ $("#trash").droppable({
     ui.draggable.remove();
     console.log("drop");
   },
-  //over: function(event, ui) {
-  //  console.log("over");
-  //},
-  //out: function(event, ui) {
-  //  console.log("out");
-  //}
+  over: function(event, ui) {
+    $(".bottom-trash").addClass("bottom-trash-active");
+  },
+  out: function(event, ui) {
+    $(".bottom-trash").removeClass("bottom-trash-active");
+  }
 })
 
 var auditTask = function(taskEl){
   // get date from task element
   var date = $(taskEl).find("span").text().trim();
 
-  console.log(date);
 
   // convert to moment object at 5:00pm
   var time = moment(date, "L").set("hour", 17);
 
-  console.log(time);
  
   // remove any old classes from element
   $(taskEl).removeClass("list-group-item-warning list-group-item-danger");
@@ -246,6 +246,7 @@ var auditTask = function(taskEl){
   else if (Math.abs(moment().diff(time, "days")) <= 2) {
     $(taskEl).addClass("list-group-item-warning");
   }
+  
 }
 
 
@@ -300,4 +301,9 @@ $("#remove-tasks").on("click", function() {
 // load tasks for the first time
 loadTasks();
 
+setInterval(function() {
+  $(".card .list-group-item").each(function(index, el) {
+   auditTask(el);
+  });
+}, (1000 * 60) * 30);
 
